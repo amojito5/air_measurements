@@ -1,0 +1,18 @@
+# Environnement virtuel
+.venv/
+venv/
+env/
+
+# Cache Python
+__pycache__/
+*.pyc
+
+# Données & Cache local (Ne pas commiter l'API Key ni les Mo/Go de JSON)
+data/cache/
+*.json
+*.html
+.env
+
+# Configuration IDE
+.vscode/
+.idea/
