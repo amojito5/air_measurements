@@ -1,0 +1,20 @@
+Metadata-Version: 2.4
+Name: air-measurements
+Version: 0.1.0
+Summary: ETL pipeline for OpenAQ air quality data to NetCDF-CF conversion
+Author: Truffier
+Keywords: openaq,netcdf,xarray,cartopy,ecmwf,air-quality
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+Requires-Dist: pandas>=2.0.0
+Requires-Dist: xarray>=2023.0.0
+Requires-Dist: netcdf4>=1.6.0
+Requires-Dist: h5netcdf>=1.2.0
+Requires-Dist: matplotlib>=3.7.0
+Requires-Dist: cartopy>=0.21.0
+Requires-Dist: requests>=2.28.0
+Requires-Dist: urllib3>=2.0.0
+Provides-Extra: dev
+Requires-Dist: pytest>=7.0.0; extra == "dev"
+Requires-Dist: black>=23.0.0; extra == "dev"
+Requires-Dist: ruff>=0.1.0; extra == "dev"

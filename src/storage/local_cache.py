@@ -16,7 +16,10 @@ class LocalCache:
         self.ttl_seconds = ttl_seconds  # 86400s = 24 heures
 
     def _get_path(self, key: str) -> Path:
-        return self.cache_dir / f"{key}.json"
+        filepath = self.cache_dir / f"{key}.json"
+        # Crée automatiquement les sous-dossiers (ex: cache/sensors/ ou cache/bbox/)
+        filepath.parent.mkdir(parents=True, exist_ok=True)
+        return filepath
 
     def get(self, key: str) -> Optional[dict]:
         """Renvoie les données si le fichier existe et que son âge < ttl_seconds."""

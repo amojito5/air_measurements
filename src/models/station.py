@@ -20,16 +20,16 @@ class SensorParams:
 class Sensor:
     id: int
     name: str
-    parameter: SensorParams
-    averages: Optional[list[float]] = None
+    parameter: dict[str, Any]  # Ex: {"id": 5, "name": "no2", "units": "µg/m³"}
+    averages: Optional[list[dict[str, Any]]] = None
 
     @classmethod
-    def from_dict(cls, attributes: dict[str, Any]) -> "Sensor":
+    def from_dict(cls, data: dict[str, Any]) -> "Sensor":
         return cls(
-            id=attributes["id"],
-            name=attributes["name"],
-            parameter=SensorParams.from_dict(attributes["parameter"]),
-            averages=attributes.get("averages"),
+            id=data["id"],
+            name=data.get("name", ""),
+            parameter=data.get("parameter", {}),
+            averages=data.get("averages"),
         )
 
 
@@ -82,16 +82,12 @@ class StationCollection:
         if id in sensor_map:
             sensor_map[id].averages = values
 
-    def set_averages_bulk(self, averages_map: dict[int, list[float]]) -> None:
-        """Met à jour les moyennes de plusieurs capteurs en une seule passe."""
-        sensor_map = {
-            sensor.id: sensor
-            for station in self.stations
-            for sensor in station.sensors
-        }
-        for sensor_id, values in averages_map.items():
-            if sensor_id in sensor_map:
-                sensor_map[sensor_id].averages = values
+    # Dans StationCollection ou Station :
+    def set_averages_bulk(self, averages_map: dict[int, list[dict]]):
+        for station in self.stations:
+            for sensor in station.sensors:
+                if sensor.id in averages_map:
+                    sensor.averages = averages_map[sensor.id]
 
     # --- SÉRIALISATION POUR LE CACHE ---
     def to_dict(self) -> dict[str, Any]:
