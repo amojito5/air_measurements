@@ -1,2 +1,4 @@
-from .repository import *
-from .client import *
+from .client import OpenAQClient
+from .repository import StationRepository
+
+__all__ = ["OpenAQClient", "StationRepository"]

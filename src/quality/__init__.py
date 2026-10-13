@@ -1,1 +1,3 @@
-from .checker import *
+from .checker import QualityChecker
+
+__all__ = ["QualityChecker"]

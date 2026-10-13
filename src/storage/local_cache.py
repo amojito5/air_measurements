@@ -2,11 +2,10 @@
 import json
 import time
 from pathlib import Path
-from typing import Optional
 
 
 class LocalCache:
-    """Gère la persistance JSON avec péremption par durée de vie (TTL)."""
+    """Manage JSON cache with TTL."""
 
     def __init__(
         self, cache_dir: str = "data/cache", ttl_seconds: int = 86400
@@ -17,12 +16,11 @@ class LocalCache:
 
     def _get_path(self, key: str) -> Path:
         filepath = self.cache_dir / f"{key}.json"
-        # Crée automatiquement les sous-dossiers (ex: cache/sensors/ ou cache/bbox/)
         filepath.parent.mkdir(parents=True, exist_ok=True)
         return filepath
 
-    def get(self, key: str) -> Optional[dict]:
-        """Renvoie les données si le fichier existe et que son âge < ttl_seconds."""
+    def get(self, key: str) -> dict | None:
+        """Return file if existing with < ttl_seconds."""
         filepath = self._get_path(key)
         if not filepath.exists():
             return None
@@ -31,18 +29,18 @@ class LocalCache:
         file_age = time.time() - filepath.stat().st_mtime
         if file_age > self.ttl_seconds:
             print(
-                f"⌛ Cache expiré ({int(file_age / 3600)}h). Récupération réseau requise."
+                f"Cache expired ({int(file_age / 3600)}h). Request required."
             )
             return None
 
         try:
             with open(filepath, "r", encoding="utf-8") as f:
                 return json.load(f)
-        except Exception:
+        except (FileNotFoundError, json.JSONDecodeError):
             return None
 
     def set(self, key: str, data: dict) -> None:
-        """Enregistre le dictionnaire en JSON local."""
+        """Dict to JSON local."""
         filepath = self._get_path(key)
         with open(filepath, "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=2)

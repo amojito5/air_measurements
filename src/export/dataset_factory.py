@@ -1,14 +1,16 @@
 # src/export/dataset_factory.py
+from typing import ClassVar
+
 import numpy as np
 import pandas as pd
 import xarray as xr
-from src.models.station import StationCollection
-from src.quality.checker import QualityChecker  # 👈 1. Import du checker
+
+from models.station import StationCollection
+from quality.checker import QualityChecker
 
 
 class NetCDFDatasetFactory:
-
-    CF_STANDARD_NAMES = {
+    CF_STANDARD_NAMES: ClassVar[dict[str, str]] = {
         "no2": "mass_concentration_of_nitrogen_dioxide_in_air",
         "pm10": "mass_concentration_of_pm10_ambient_aerosol_in_air",
         "pm25": "mass_concentration_of_pm2p5_ambient_aerosol_in_air",
@@ -53,10 +55,12 @@ class NetCDFDatasetFactory:
                         continue
 
                     time_str = (
-                        m.get("time_from") 
-                        or m.get("time") 
+                        m.get("time_from")
+                        or m.get("time")
                         or m.get("datetime")
-                        or (m.get("period", {}).get("datetimeFrom", {}).get("utc") if isinstance(m.get("period"), dict) else None)
+                        or (m.get("period", {}).get(
+                            "datetimeFrom", {}).get("utc")
+                            if isinstance(m.get("period"), dict) else None)
                     )
 
                     if time_str:
@@ -69,12 +73,12 @@ class NetCDFDatasetFactory:
                         })
 
         if not raw_records:
-            print("⚠️ Aucune donnée hydratée trouvée dans la collection. Vérifiez l'injection dans sensor.averages.")
+            print("No hydratate data in collection. Check sensor.averages.")
             return xr.Dataset()
 
         df = pd.DataFrame(raw_records)
 
-        # 🟢 2. INJECTION DU QUALITY CHECKER ICI
+        # 1. INJECTION : QUALITY CHECKER
         qc = QualityChecker()
         for param in df["parameter"].unique():
             mask = df["parameter"] == param
@@ -83,10 +87,6 @@ class NetCDFDatasetFactory:
                 series=df.loc[mask, "value"]
             )
 
-        # -------------------------------------------------------------
-        # La suite de ton code existant reste 100% identique
-        # -------------------------------------------------------------
-        
         # Alignement matriciel xarray
         data_vars = {}
         unique_params = df["parameter"].unique()
@@ -100,10 +100,17 @@ class NetCDFDatasetFactory:
             max_time = max_time.tz_localize(None)
             df["time"] = df["time"].dt.tz_localize(None)
 
-        df["time"] = pd.to_datetime(df["time"]).dt.to_period("Y").dt.to_timestamp(how="end").dt.floor("D")
-
+        df["time"] = (
+            pd.to_datetime(df["time"])
+            .dt.to_period("Y")
+            .dt.to_timestamp(how="end")
+            .dt.floor("D")
+        )
         # 2. Calcul de la moyenne annuelle par station et par polluant
-        df_grouped = df.groupby(["station_id", "time", "parameter"])["value"].mean().reset_index()
+        df_grouped = (
+                df.groupby(["station_id", "time", "parameter"])["value"]
+                .mean().reset_index()
+        )
 
         # 3. Grille temporelle annuelle alignée
         all_times = pd.date_range(
@@ -111,24 +118,40 @@ class NetCDFDatasetFactory:
             end=df["time"].max(),
             freq="1YE"
         )
-        
         all_stations = list(station_meta.keys())
 
         for param in unique_params:
             df_param = df[df["parameter"] == param]
-            df_grouped = df_param.groupby(["station_id", "time"])["value"].mean().reset_index()
-            df_pivot = df_grouped.pivot(index="station_id", columns="time", values="value")
-            df_reindexed = df_pivot.reindex(index=all_stations, columns=all_times)
+            df_grouped = (
+                    df_param.groupby(["station_id", "time"])["value"]
+                    .mean().reset_index()
+            )
+            df_pivot = (
+                    df_grouped.pivot(
+                        index="station_id",
+                        columns="time",
+                        values="value")
+            )
+            df_reindexed = (
+                    df_pivot.reindex(index=all_stations, columns=all_times)
+            )
 
-            unit_str = df_param["unit"].iloc[0] if not df_param.empty else "ug m-3"
+            unit_str = (
+                    df_param["unit"].iloc[0]
+                    if not df_param.empty
+                    else "ug m-3"
+            )
 
             data_vars[param] = (
                 ["station", "time"],
                 df_reindexed.values,
                 {
-                    "standard_name": NetCDFDatasetFactory.CF_STANDARD_NAMES.get(
-                        param, f"mass_concentration_of_{param}_in_air"
-                    ),
+                    "standard_name": (
+                        NetCDFDatasetFactory.CF_STANDARD_NAMES.get(
+                            param,
+                            f"mass_concentration_of_{param}_in_air"
+                            )
+                        ),
                     "units": unit_str,
                     "cell_methods": f"time: mean (interval: {freq})",
                     "_FillValue": np.nan,

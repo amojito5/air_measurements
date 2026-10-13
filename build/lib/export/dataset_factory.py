@@ -2,6 +2,7 @@
 import numpy as np
 import pandas as pd
 import xarray as xr
+
 from src.models.station import StationCollection
 from src.quality.checker import QualityChecker  # 👈 1. Import du checker
 

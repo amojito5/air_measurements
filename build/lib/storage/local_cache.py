@@ -2,7 +2,6 @@
 import json
 import time
 from pathlib import Path
-from typing import Optional
 
 
 class LocalCache:
@@ -21,7 +20,7 @@ class LocalCache:
         filepath.parent.mkdir(parents=True, exist_ok=True)
         return filepath
 
-    def get(self, key: str) -> Optional[dict]:
+    def get(self, key: str) -> dict | None:
         """Renvoie les données si le fichier existe et que son âge < ttl_seconds."""
         filepath = self._get_path(key)
         if not filepath.exists():

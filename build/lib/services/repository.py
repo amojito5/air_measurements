@@ -1,20 +1,17 @@
 # src/services/station_repository.py
-import time
 from concurrent.futures import ThreadPoolExecutor
-from typing import Optional
 
 from src.models.station import StationCollection
 from src.services.client import OpenAQClient
 from src.storage.local_cache import LocalCache
 
-import json
 
 class StationRepository:
 
     def __init__(
         self,
         client: OpenAQClient,
-        cache: Optional[LocalCache] = None,
+        cache: LocalCache | None = None,
         max_workers: int = 2,
     ):
         self.client = client

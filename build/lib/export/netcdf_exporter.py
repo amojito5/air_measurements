@@ -1,6 +1,6 @@
 # src/export/netcdf_exporter.py
 from pathlib import Path
-from typing import Optional
+
 import xarray as xr
 
 
@@ -55,4 +55,4 @@ class NetCDFExporter:
 
         except Exception as err:
             print(f"❌ Erreur lors de l'export NetCDF ({filename}) : {err}")
-            raise err
+            raise

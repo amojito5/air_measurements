@@ -1,4 +1,5 @@
 pyproject.toml
+src/config.py
 src/air_measurements.egg-info/PKG-INFO
 src/air_measurements.egg-info/SOURCES.txt
 src/air_measurements.egg-info/dependency_links.txt
@@ -18,3 +19,5 @@ src/services/client.py
 src/services/repository.py
 src/storage/__init__.py
 src/storage/local_cache.py
+tests/test_config.py
+tests/test_netcdf.py

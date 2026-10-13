@@ -36,3 +36,6 @@ dev = [
 # Raccourci pour lancer ton pipeline en CLI (optionnel)
 [project.scripts]
 run-etl = "main:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

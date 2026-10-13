@@ -1,16 +1,16 @@
 # src/quality/checker.py
+import logging
+from typing import ClassVar
+
 import numpy as np
 import pandas as pd
-import logging
 
 logger = logging.getLogger(__name__)
 
+
 class QualityChecker:
-    """Module de contrôle qualité (QC) pour les données d'observations de qualité de l'air."""
-    
-    # Seuils physiques plausibles (en µg/m³)
-    # Les valeurs en dehors de cette plage sont considérées comme des erreurs d'instrumentation.
-    THRESHOLDS = {
+    """Quality Checker module"""
+    THRESHOLDS: ClassVar[dict[str, dict[str, float]]] = {
         "no2": {"min": 0.0, "max": 1000.0},
         "pm25": {"min": 0.0, "max": 1000.0},
         "pm10": {"min": 0.0, "max": 2000.0},
@@ -25,23 +25,21 @@ class QualityChecker:
     def clean_series(self, parameter: str, series: pd.Series) -> pd.Series:
         """Nettoie une série Pandas de mesures pour un polluant donné."""
         param_clean = parameter.lower().strip()
-        
+
         if param_clean not in self.thresholds:
-            logger.warning(f"⚠️ Aucun seuil QC défini pour '{parameter}'. Aucune validation effectuée.")
+            logger.warning(f"No QC threshold for '{parameter}'.")
             return series
 
         bounds = self.thresholds[param_clean]
         min_val, max_val = bounds["min"], bounds["max"]
 
-        # Copie pour éviter le SettingWithCopyWarning
         cleaned = series.copy()
 
-        # Identification des anomalies (valeurs négatives ou hors limites supérieures)
         invalid_mask = (cleaned < min_val) | (cleaned > max_val)
         nb_invalids = invalid_mask.sum()
 
         if nb_invalids > 0:
-            logger.info(f"🧹 QC [{param_clean.upper()}]: {nb_invalids} valeur(s) aberrante(s) remplacée(s) par NaN.")
+            logger.info(f"QC [{param_clean.upper()}]: {nb_invalids} to NaN.")
             cleaned[invalid_mask] = np.nan
 
         return cleaned

@@ -1,0 +1,11 @@
+[area]
+name = "Paris_Centre"
+bbox = [2.29, 48.85, 2.37, 48.89] # [lon_min, lat_min, lon_max, lat_max]
+
+[runtime]
+max_workers = 1
+ttl_seconds = 86400
+
+[api]
+limit = 100       # Number of days
+timeout = 20      # Timeout HTTP (s)

@@ -1,6 +1,6 @@
 # src/models/station.py
 from dataclasses import asdict, dataclass
-from typing import Any, Optional
+from typing import Any
 
 
 @dataclass
@@ -21,7 +21,7 @@ class Sensor:
     id: int
     name: str
     parameter: dict[str, Any]  # Ex: {"id": 5, "name": "no2", "units": "µg/m³"}
-    averages: Optional[list[dict[str, Any]]] = None
+    averages: list[dict[str, Any]] | None = None
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "Sensor":

@@ -1,2 +1,2 @@
-from .repository import *
 from .client import *
+from .repository import *

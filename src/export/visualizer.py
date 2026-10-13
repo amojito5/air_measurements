@@ -1,12 +1,13 @@
 # src/export/visualizer.py
 from pathlib import Path
+
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
-import matplotlib.animation as animation
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import xarray as xr
+from matplotlib import animation
 
 
 class AirQualityAnimator:
@@ -14,7 +15,9 @@ class AirQualityAnimator:
     def __init__(self, nc_path: str | Path):
         self.nc_path = Path(nc_path)
         if not self.nc_path.exists():
-            raise FileNotFoundError(f"Fichier NetCDF introuvable : {self.nc_path}")
+            raise FileNotFoundError(
+                    f"Fichier NetCDF introuvable : {self.nc_path}"
+                    )
 
         self.ds = xr.open_dataset(self.nc_path)
 
@@ -27,27 +30,28 @@ class AirQualityAnimator:
     ) -> Path:
         if variable not in self.ds.data_vars:
             raise ValueError(
-                f"Variable '{variable}' non présente dans le NetCDF. Variables disponibles : {list(self.ds.data_vars.keys())}"
+                f"Variable '{variable}' non présente."
+                f"Vars dispos : {list(self.ds.data_vars.keys())}"
             )
 
-        # 1. Extraction des coordonnées et données
+        # 1. Extraction
         lats_all = self.ds["latitude"].values
         lons_all = self.ds["longitude"].values
         times = self.ds["time"].values
-        data_all = self.ds[variable].values  # Matrice (station, time)
+        data_all = self.ds[variable].values
 
-        # 2. Filtrage : On garde uniquement les stations qui ont AU MOINS UNE mesure non-NaN pour ce polluant
+        # 2. Filtering
         valid_stations_mask = ~np.isnan(data_all).all(axis=1)
 
         if not np.any(valid_stations_mask):
-            print(f"⚠️ Aucune donnée disponible pour le polluant {variable}.")
+            print(f"Aucune donnée disponible pour le polluant {variable}.")
             return Path(output_gif)
 
         lats = lats_all[valid_stations_mask]
         lons = lons_all[valid_stations_mask]
-        data = data_all[valid_stations_mask, :]  # Matrice filtrée (valid_stations, time)
+        data = data_all[valid_stations_mask, :]
 
-        # 3. Calcul sécurisé des bornes min/max (sans plantage dû aux NaN)
+        # 3. Min/max calculation
         valid_values = data[~np.isnan(data)]
         if len(valid_values) == 0:
             vmin, vmax = 0, 50
@@ -81,7 +85,6 @@ class AirQualityAnimator:
 
         # 5. Tracer initial des points
         initial_frame_data = data[:, 0]
-        
         scatter = ax.scatter(
             lons,
             lats,
@@ -96,8 +99,17 @@ class AirQualityAnimator:
             zorder=5,
         )
 
-        cbar = plt.colorbar(scatter, ax=ax, orientation="vertical", shrink=0.7, pad=0.03)
-        cbar.set_label(f"Concentration ({units})", fontsize=11, fontweight="bold")
+        cbar = plt.colorbar(
+                scatter,
+                ax=ax,
+                orientation="vertical",
+                shrink=0.7,
+                pad=0.03
+        )
+        cbar.set_label(
+                f"Concentration ({units})",
+                fontsize=11,
+                fontweight="bold")
 
         title_time = pd.to_datetime(times[0]).strftime("%Y-%m-%d %H:%M UTC")
         title_text = ax.set_title(
@@ -107,12 +119,13 @@ class AirQualityAnimator:
             pad=12,
         )
 
-        # 6. Animation frame par frame
+        # 6. Animation frame by frame
         def update(frame: int):
-            current_time = pd.to_datetime(times[frame]).strftime("%Y-%m-%d %H:%M UTC")
-            # Extraction explicite d'un tableau 1D pour l'instant 'frame'
+            current_time = pd.to_datetime(
+                    times[frame]).strftime(
+                            "%Y-%m-%d %H:%M UTC"
+                            )
             frame_values = data[:, frame]
-            
             scatter.set_array(frame_values)
             title_text.set_text(f"OpenAQ {variable.upper()} - {current_time}")
             return scatter, title_text
@@ -125,5 +138,5 @@ class AirQualityAnimator:
         ani.save(output_path, writer="pillow", fps=fps)
         plt.close(fig)
 
-        print(f"🎬 Animation GIF générée : {output_path.resolve()}")
+        print(f"Animation GIF générée : {output_path.resolve()}")
         return output_path

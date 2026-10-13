@@ -1,6 +1,6 @@
 # src/models/station.py
 from dataclasses import asdict, dataclass
-from typing import Any, Optional
+from typing import Any
 
 
 @dataclass
@@ -21,7 +21,7 @@ class Sensor:
     id: int
     name: str
     parameter: dict[str, Any]  # Ex: {"id": 5, "name": "no2", "units": "µg/m³"}
-    averages: Optional[list[dict[str, Any]]] = None
+    averages: list[dict[str, Any]] | None = None
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "Sensor":
@@ -62,14 +62,16 @@ class StationCollection:
 
     @property
     def station_ids(self) -> list[int]:
-        """Retourne la liste de tous les IDs de stations."""
+        """Return ids of all stations."""
         return [station.id for station in self.stations]
 
     @property
     def sensor_ids(self) -> list[int]:
-        """Retourne la liste de tous les IDs de capteurs de toutes les stations."""
+        """Return ids list of all sensors of all stations."""
         return [
-            sensor.id for station in self.stations for sensor in station.sensors
+            sensor.id
+            for station in self.stations
+            for sensor in station.sensors
         ]
 
     def set_averages(self, id: int, values: list[float]) -> None:
@@ -82,19 +84,17 @@ class StationCollection:
         if id in sensor_map:
             sensor_map[id].averages = values
 
-    # Dans StationCollection ou Station :
     def set_averages_bulk(self, averages_map: dict[int, list[dict]]):
         for station in self.stations:
             for sensor in station.sensors:
                 if sensor.id in averages_map:
                     sensor.averages = averages_map[sensor.id]
 
-    # --- SÉRIALISATION POUR LE CACHE ---
     def to_dict(self) -> dict[str, Any]:
-        """Convertit l'intégralité de la collection en dictionnaire JSON-compatible."""
+        """Dict toJSON-compatible convresion"""
         return asdict(self)
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "StationCollection":
-        """Reconstruit une StationCollection (avec ses moyennes) depuis un dictionnaire de cache."""
+        """Build StationCollection with means from cached dict"""
         return cls(stations=[Station.from_dict(s) for s in data["stations"]])

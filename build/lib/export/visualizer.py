@@ -1,12 +1,13 @@
 # src/export/visualizer.py
 from pathlib import Path
+
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
-import matplotlib.animation as animation
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import xarray as xr
+from matplotlib import animation
 
 
 class AirQualityAnimator:
