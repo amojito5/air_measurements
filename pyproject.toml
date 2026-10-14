@@ -41,6 +41,7 @@ run-etl = "main:main"
 where = ["src"]
 
 [tool.ruff]
+line-length = 79
 exclude = [
     ".git",
     ".venv",

@@ -26,14 +26,12 @@ api_limit = config.get("api", {}).get("limit", 1000)
 api_timeout = config.get("api", {}).get("timeout", 20)
 
 logger.info(
-        "Démarrage du pipeline pour la zone : [%s] %s",
-        env_name.upper(), site_name
-        )
+    "Démarrage du pipeline pour la zone : [%s] %s", env_name.upper(), site_name
+)
 
 client = OpenAQClient(API_KEY, timeout=api_timeout, default_limit=api_limit)
 repo = StationRepository(
-    client=OpenAQClient(API_KEY, timeout=api_timeout),
-    max_workers=max_workers
+    client=OpenAQClient(API_KEY, timeout=api_timeout), max_workers=max_workers
 )
 stations = repo.get_hydrated_stations(bbox, force_refresh=False)
 

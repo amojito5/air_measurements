@@ -37,8 +37,7 @@ def test_netcdf_exporter_creates_file(tmp_path, dummy_dataset):
         assert "pm25" in loaded_ds.data_vars
         assert "time" in loaded_ds.dims
         np.testing.assert_array_equal(
-            loaded_ds["pm25"].values,
-            [10.5, 12.0, 15.2]
+            loaded_ds["pm25"].values, [10.5, 12.0, 15.2]
         )
 
 

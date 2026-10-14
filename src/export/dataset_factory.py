@@ -21,8 +21,7 @@ class NetCDFDatasetFactory:
 
     @staticmethod
     def create_from_collection(
-        collection: StationCollection,
-        freq: str = "1D"
+        collection: StationCollection, freq: str = "1D"
     ) -> xr.Dataset:
         raw_records = []
         station_meta = {}
@@ -58,19 +57,25 @@ class NetCDFDatasetFactory:
                         m.get("time_from")
                         or m.get("time")
                         or m.get("datetime")
-                        or (m.get("period", {}).get(
-                            "datetimeFrom", {}).get("utc")
-                            if isinstance(m.get("period"), dict) else None)
+                        or (
+                            m.get("period", {})
+                            .get("datetimeFrom", {})
+                            .get("utc")
+                            if isinstance(m.get("period"), dict)
+                            else None
+                        )
                     )
 
                     if time_str:
-                        raw_records.append({
-                            "station_id": station.id,
-                            "time": pd.to_datetime(time_str),
-                            "parameter": param_name,
-                            "value": float(val),
-                            "unit": param_unit,
-                        })
+                        raw_records.append(
+                            {
+                                "station_id": station.id,
+                                "time": pd.to_datetime(time_str),
+                                "parameter": param_name,
+                                "value": float(val),
+                                "unit": param_unit,
+                            }
+                        )
 
         if not raw_records:
             print("No hydratate data in collection. Check sensor.averages.")
@@ -83,8 +88,7 @@ class NetCDFDatasetFactory:
         for param in df["parameter"].unique():
             mask = df["parameter"] == param
             df.loc[mask, "value"] = qc.clean_series(
-                parameter=str(param),
-                series=df.loc[mask, "value"]
+                parameter=str(param), series=df.loc[mask, "value"]
             )
 
         # Alignement matriciel xarray
@@ -108,38 +112,33 @@ class NetCDFDatasetFactory:
         )
         # 2. Calcul de la moyenne annuelle par station et par polluant
         df_grouped = (
-                df.groupby(["station_id", "time", "parameter"])["value"]
-                .mean().reset_index()
+            df.groupby(["station_id", "time", "parameter"])["value"]
+            .mean()
+            .reset_index()
         )
 
         # 3. Grille temporelle annuelle alignée
         all_times = pd.date_range(
-            start=df["time"].min(),
-            end=df["time"].max(),
-            freq="1YE"
+            start=df["time"].min(), end=df["time"].max(), freq="1YE"
         )
         all_stations = list(station_meta.keys())
 
         for param in unique_params:
             df_param = df[df["parameter"] == param]
             df_grouped = (
-                    df_param.groupby(["station_id", "time"])["value"]
-                    .mean().reset_index()
+                df_param.groupby(["station_id", "time"])["value"]
+                .mean()
+                .reset_index()
             )
-            df_pivot = (
-                    df_grouped.pivot(
-                        index="station_id",
-                        columns="time",
-                        values="value")
+            df_pivot = df_grouped.pivot(
+                index="station_id", columns="time", values="value"
             )
-            df_reindexed = (
-                    df_pivot.reindex(index=all_stations, columns=all_times)
+            df_reindexed = df_pivot.reindex(
+                index=all_stations, columns=all_times
             )
 
             unit_str = (
-                    df_param["unit"].iloc[0]
-                    if not df_param.empty
-                    else "ug m-3"
+                df_param["unit"].iloc[0] if not df_param.empty else "ug m-3"
             )
 
             data_vars[param] = (
@@ -148,10 +147,9 @@ class NetCDFDatasetFactory:
                 {
                     "standard_name": (
                         NetCDFDatasetFactory.CF_STANDARD_NAMES.get(
-                            param,
-                            f"mass_concentration_of_{param}_in_air"
-                            )
-                        ),
+                            param, f"mass_concentration_of_{param}_in_air"
+                        )
+                    ),
                     "units": unit_str,
                     "cell_methods": f"time: mean (interval: {freq})",
                     "_FillValue": np.nan,

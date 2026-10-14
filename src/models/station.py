@@ -11,9 +11,7 @@ class SensorParams:
 
     @classmethod
     def from_dict(cls, params: dict[str, Any]) -> "SensorParams":
-        return cls(
-            id=params["id"], name=params["name"], units=params["units"]
-        )
+        return cls(id=params["id"], name=params["name"], units=params["units"])
 
 
 @dataclass

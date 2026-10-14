@@ -9,7 +9,6 @@ from storage.local_cache import LocalCache
 
 
 class StationRepository:
-
     def __init__(
         self,
         client: OpenAQClient,
@@ -21,9 +20,7 @@ class StationRepository:
         self.max_workers = max_workers
 
     def _fetch_single_sensor_averages(
-        self,
-        sensor_id: int,
-        force_refresh: bool = False
+        self, sensor_id: int, force_refresh: bool = False
     ) -> tuple[int, list[dict]]:
         cache_key = f"sensors/{sensor_id}"
 
@@ -73,10 +70,9 @@ class StationRepository:
         with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
             results = executor.map(
                 lambda s_id: self._fetch_single_sensor_averages(
-                    s_id,
-                    force_refresh
+                    s_id, force_refresh
                 ),
-                collection.sensor_ids
+                collection.sensor_ids,
             )
             for sensor_id, values in results:
                 if values:

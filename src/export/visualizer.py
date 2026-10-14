@@ -11,13 +11,12 @@ from matplotlib import animation
 
 
 class AirQualityAnimator:
-
     def __init__(self, nc_path: str | Path):
         self.nc_path = Path(nc_path)
         if not self.nc_path.exists():
             raise FileNotFoundError(
-                    f"Fichier NetCDF introuvable : {self.nc_path}"
-                    )
+                f"Fichier NetCDF introuvable : {self.nc_path}"
+            )
 
         self.ds = xr.open_dataset(self.nc_path)
 
@@ -100,16 +99,11 @@ class AirQualityAnimator:
         )
 
         cbar = plt.colorbar(
-                scatter,
-                ax=ax,
-                orientation="vertical",
-                shrink=0.7,
-                pad=0.03
+            scatter, ax=ax, orientation="vertical", shrink=0.7, pad=0.03
         )
         cbar.set_label(
-                f"Concentration ({units})",
-                fontsize=11,
-                fontweight="bold")
+            f"Concentration ({units})", fontsize=11, fontweight="bold"
+        )
 
         title_time = pd.to_datetime(times[0]).strftime("%Y-%m-%d %H:%M UTC")
         title_text = ax.set_title(
@@ -121,10 +115,9 @@ class AirQualityAnimator:
 
         # 6. Animation frame by frame
         def update(frame: int):
-            current_time = pd.to_datetime(
-                    times[frame]).strftime(
-                            "%Y-%m-%d %H:%M UTC"
-                            )
+            current_time = pd.to_datetime(times[frame]).strftime(
+                "%Y-%m-%d %H:%M UTC"
+            )
             frame_values = data[:, frame]
             scatter.set_array(frame_values)
             title_text.set_text(f"OpenAQ {variable.upper()} - {current_time}")

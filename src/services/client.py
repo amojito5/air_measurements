@@ -11,14 +11,13 @@ logging.basicConfig(level=logging.INFO)
 
 
 class OpenAQClient:
-
     def __init__(
-            self,
-            api_key: str,
-            timeout: int = 10,
-            retries: int = 3,
-            default_limit: int = 100
-            ):
+        self,
+        api_key: str,
+        timeout: int = 10,
+        retries: int = 3,
+        default_limit: int = 100,
+    ):
         self.api_key = api_key
         self.BASE_URL = "https://api.openaq.org/v3/"
         self.timeout = timeout
@@ -60,11 +59,11 @@ class OpenAQClient:
         )
         response.raise_for_status()
         return station.StationCollection.from_openaq_list(
-                response.json().get("results", [])
-                )
+            response.json().get("results", [])
+        )
 
     def get_average(
-            self, sensor_id: int, limit: int = 1000
+        self, sensor_id: int, limit: int = 1000
     ) -> list[dict[str, Any]]:
         """Retrieve senors mean values."""
         endpoint = f"{self.BASE_URL}sensors/{sensor_id}/days"

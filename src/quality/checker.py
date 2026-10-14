@@ -10,6 +10,7 @@ logger = logging.getLogger(__name__)
 
 class QualityChecker:
     """Quality Checker module"""
+
     THRESHOLDS: ClassVar[dict[str, dict[str, float]]] = {
         "no2": {"min": 0.0, "max": 1000.0},
         "pm25": {"min": 0.0, "max": 1000.0},
