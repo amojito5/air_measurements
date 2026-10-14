@@ -7,8 +7,9 @@ env/
 __pycache__/
 *.pyc
 
-# Données & Cache local (Ne pas commiter l'API Key ni les Mo/Go de JSON)
+# Données, Build & Cache local (Ne pas commiter l'API Key ni les Mo/Go de JSON)
 data/
+build/
 *.json
 *.html
 .env

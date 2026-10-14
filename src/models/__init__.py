@@ -1,3 +1,3 @@
-from .station import SensorParams, Sensor, Station, StationCollection
+from .station import Sensor, SensorParams, Station, StationCollection
 
-__all__ = ["SensorParams", "Sensor", "Station", "StationCollection"]
+__all__ = ["Sensor", "SensorParams", "Station", "StationCollection"]
